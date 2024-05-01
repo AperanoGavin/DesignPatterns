@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ShipFactory
 {
-    // Classe représentant un vaisseau
     class Ship
     {
         public string Name { get; set; }
@@ -16,7 +16,6 @@ namespace ShipFactory
         }
     }
 
-    // Classe représentant l'inventaire des pièces
     class Inventory
     {
         private Dictionary<string, int> stock;
@@ -26,7 +25,6 @@ namespace ShipFactory
             stock = new Dictionary<string, int>();
         }
 
-        // Ajouter des pièces à l'inventaire
         public void AddToStock(string part, int quantity)
         {
             if (stock.ContainsKey(part))
@@ -35,7 +33,6 @@ namespace ShipFactory
                 stock[part] = quantity;
         }
 
-        // Afficher l'inventaire
         public void ShowInventory()
         {
             Console.WriteLine("Inventory:");
@@ -45,29 +42,56 @@ namespace ShipFactory
             }
         }
 
-        // Vérifier si une commande est réalisable avec le stock actuel
-        public bool VerifyCommand(Dictionary<string, int> command)
+        public Dictionary<string, int> GetNeededStock(Dictionary<string, int> command)
         {
-            foreach (var item in command)
+            var neededStock = new Dictionary<string, int>();
+
+            foreach (var kvp in command)
             {
-                if (!stock.ContainsKey(item.Key) || stock[item.Key] < item.Value)
-                    return false;
+                string shipType = kvp.Key;
+                int quantity = kvp.Value;
+
+                // Check if ship type is valid
+                if (shipType != "Explorer" && shipType != "Speeder" && shipType != "Cargo")
+                {
+                    Console.WriteLine($"ERROR: '{shipType}' is not a recognized spaceship.");
+                    return null;
+                }
+
+                var shipParts = GetShipParts(shipType);
+                foreach (var part in shipParts)
+                {
+                    if (stock.ContainsKey(part))
+                    {
+                        if (neededStock.ContainsKey(part))
+                            neededStock[part] += quantity;
+                        else
+                            neededStock[part] = quantity;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"ERROR: Part '{part}' is not available in stock.");
+                        return null;
+                    }
+                }
             }
-            return true;
+
+            return neededStock;
         }
 
-        // Exécuter une commande en retirant les pièces nécessaires du stock
-        public bool ExecuteCommand(Dictionary<string, int> command)
+        private List<string> GetShipParts(string shipType)
         {
-            if (VerifyCommand(command))
+            switch (shipType)
             {
-                foreach (var item in command)
-                {
-                    stock[item.Key] -= item.Value;
-                }
-                return true;
+                case "Explorer":
+                    return new List<string> { "Hull_HE1", "Engine_EE1", "Wings_WE1", "Thruster_TE1" };
+                case "Speeder":
+                    return new List<string> { "Hull_HS1", "Engine_ES1", "Wings_WS1", "Thruster_TS1", "Thruster_TS1" };
+                case "Cargo":
+                    return new List<string> { "Hull_HC1", "Engine_EC1", "Wings_WC1", "Thruster_TC1" };
+                default:
+                    return new List<string>();
             }
-            return false;
         }
     }
 
@@ -75,44 +99,58 @@ namespace ShipFactory
     {
         static void Main(string[] args)
         {
+            Inventory inventory = new Inventory();
+            inventory.AddToStock("Hull_HE1", 10);
+            inventory.AddToStock("Engine_EE1", 5);
+            inventory.AddToStock("Wings_WE1", 8);
+            inventory.AddToStock("Thruster_TE1", 20);
+            inventory.AddToStock("Hull_HS1", 5);
+            inventory.AddToStock("Engine_ES1", 3);
+            inventory.AddToStock("Wings_WS1", 6);
+            inventory.AddToStock("Thruster_TS1", 15);
+            inventory.AddToStock("Thruster_TS1", 15);
+            inventory.AddToStock("Hull_HC1", 8);
+            inventory.AddToStock("Engine_EC1", 4);
+            inventory.AddToStock("Wings_WC1", 7);
+            inventory.AddToStock("Thruster_TC1", 10);
+
             if (args.Length == 0)
             {
                 Console.WriteLine("Usage: ShipFactory <command>");
                 return;
             }
 
-            Inventory inventory = new Inventory();
-            inventory.AddToStock("Hull_HE1", 10);
-            inventory.AddToStock("Engine_EE1", 5);
-            inventory.AddToStock("Wings_WE1", 8);
-            inventory.AddToStock("Thruster_TE1", 20);
-
-            // Parse the command line arguments
-            var command = ParseCommand(args);
-
-            if (command == null)
-            {
-                Console.WriteLine("Invalid command format.");
-                return;
-            }
-
             switch (args[0])
             {
-                case "show_inventory":
+                case "STOCKS":
                     inventory.ShowInventory();
                     break;
-                case "verify_command":
-                    if (inventory.VerifyCommand(command))
-                        Console.WriteLine("Command can be executed.");
-                    else
-                        Console.WriteLine("Command cannot be executed due to insufficient inventory.");
+                case "NEEDED_STOCKS":
+                    if (args.Length < 2)
+                    {
+                        Console.WriteLine("ERROR: Please provide a list of ships.");
+                        return;
+                    }
+                    var command = ParseCommand(args.Skip(1).ToArray());
+                    if (command != null)
+                    {
+                        var neededStock = inventory.GetNeededStock(command);
+                        if (neededStock != null)
+                        {
+                            Console.WriteLine("Needed Stock:");
+                            foreach (var kvp in neededStock)
+                            {
+                                Console.WriteLine($"{kvp.Value} {kvp.Key}");
+                            }
+                            Console.WriteLine("Total:");
+                            foreach (var kvp in neededStock.GroupBy(x => x.Key))
+                            {
+                                Console.WriteLine($"{kvp.Sum(x => x.Value)} {kvp.Key}");
+                            }
+                        }
+                    }
                     break;
-                case "execute_command":
-                    if (inventory.ExecuteCommand(command))
-                        Console.WriteLine("Command executed successfully.");
-                    else
-                        Console.WriteLine("Command cannot be executed due to insufficient inventory.");
-                    break;
+                // Add cases for other commands
                 default:
                     Console.WriteLine("Invalid command.");
                     break;
@@ -121,23 +159,22 @@ namespace ShipFactory
 
         static Dictionary<string, int> ParseCommand(string[] args)
         {
-            if (args.Length < 2 || args.Length % 2 == 1)
-                return null;
+            var command = new Dictionary<string, int>();
 
-            Dictionary<string, int> command = new Dictionary<string, int>();
-
-            try
+            foreach (var arg in args)
             {
-                for (int i = 1; i < args.Length; i += 2)
+                var parts = arg.Split(' ');
+                if (parts.Length != 2)
                 {
-                    string part = args[i];
-                    int quantity = int.Parse(args[i + 1]);
-                    command[part] = quantity;
+                    Console.WriteLine($"ERROR: Invalid command format '{arg}'.");
+                    return null;
                 }
-            }
-            catch (FormatException)
-            {
-                return null;
+                if (!int.TryParse(parts[0], out int quantity))
+                {
+                    Console.WriteLine($"ERROR: Invalid quantity '{parts[0]}' for ship '{parts[1]}'.");
+                    return null;
+                }
+                command[parts[1]] = quantity;
             }
 
             return command;
