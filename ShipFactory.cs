@@ -75,40 +75,72 @@ namespace ShipFactory
     {
         static void Main(string[] args)
         {
-            Inventory inventory = new Inventory();
+            if (args.Length == 0)
+            {
+                Console.WriteLine("Usage: ShipFactory <command>");
+                return;
+            }
 
-            // Ajouter des pièces à l'inventaire
+            Inventory inventory = new Inventory();
             inventory.AddToStock("Hull_HE1", 10);
             inventory.AddToStock("Engine_EE1", 5);
             inventory.AddToStock("Wings_WE1", 8);
             inventory.AddToStock("Thruster_TE1", 20);
 
-            // Afficher l'inventaire
-            inventory.ShowInventory();
+            // Parse the command line arguments
+            var command = ParseCommand(args);
 
-            // Exemple de commande
-            Dictionary<string, int> command = new Dictionary<string, int>()
+            if (command == null)
             {
-                { "Hull_HE1", 1 },
-                { "Engine_EE1", 1 },
-                { "Wings_WE1", 1 },
-                { "Thruster_TE1", 2 }
-            };
-
-            // Vérifier si la commande est réalisable et l'exécuter si possible
-            if (inventory.VerifyCommand(command))
-            {
-                Console.WriteLine("Command can be executed.");
-                inventory.ExecuteCommand(command);
-                Console.WriteLine("Command executed successfully.");
-            }
-            else
-            {
-                Console.WriteLine("Command cannot be executed due to insufficient inventory.");
+                Console.WriteLine("Invalid command format.");
+                return;
             }
 
-            // Afficher à nouveau l'inventaire après l'exécution de la commande
-            inventory.ShowInventory();
+            switch (args[0])
+            {
+                case "show_inventory":
+                    inventory.ShowInventory();
+                    break;
+                case "verify_command":
+                    if (inventory.VerifyCommand(command))
+                        Console.WriteLine("Command can be executed.");
+                    else
+                        Console.WriteLine("Command cannot be executed due to insufficient inventory.");
+                    break;
+                case "execute_command":
+                    if (inventory.ExecuteCommand(command))
+                        Console.WriteLine("Command executed successfully.");
+                    else
+                        Console.WriteLine("Command cannot be executed due to insufficient inventory.");
+                    break;
+                default:
+                    Console.WriteLine("Invalid command.");
+                    break;
+            }
+        }
+
+        static Dictionary<string, int> ParseCommand(string[] args)
+        {
+            if (args.Length < 2 || args.Length % 2 == 1)
+                return null;
+
+            Dictionary<string, int> command = new Dictionary<string, int>();
+
+            try
+            {
+                for (int i = 1; i < args.Length; i += 2)
+                {
+                    string part = args[i];
+                    int quantity = int.Parse(args[i + 1]);
+                    command[part] = quantity;
+                }
+            }
+            catch (FormatException)
+            {
+                return null;
+            }
+
+            return command;
         }
     }
 }
