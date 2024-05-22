@@ -42,6 +42,21 @@ namespace ShipFactory
             }
         }
 
+        public bool IsStockAvailableFor(Dictionary<string, int> command)
+        {
+            var neededStock = GetNeededStock(command);
+            if (neededStock == null)
+                return false;
+
+            foreach (var kvp in neededStock)
+            {
+                if (!stock.ContainsKey(kvp.Key) || stock[kvp.Key] < kvp.Value)
+                    return false;
+            }
+
+            return true;
+        }
+
         public Dictionary<string, int> GetNeededStock(Dictionary<string, int> command)
         {
             var neededStock = new Dictionary<string, int>();
@@ -86,6 +101,21 @@ namespace ShipFactory
                 case "Explorer":
                     return new List<string> { "Hull_HE1", "Engine_EE1", "Wings_WE1", "Thruster_TE1" };
                 case "Speeder":
+                    return new List<string> { "Hull_HS1", "Engine_ES1", "Wings_WS1", "Thruster_TS1" };
+                case "Cargo":
+                    return new List<string> { "Hull_HC1", "Engine_EC1", "Wings_WC1", "Thruster_TC1" };
+                default:
+                    return new List<string>();
+            }
+        }
+
+        public List<string> GetPartsForShip(string shipType)
+       {
+        switch (shipType)
+            {
+                case "Explorer":
+                    return new List<string> { "Hull_HE1", "Engine_EE1", "Wings_WE1", "Thruster_TE1" };
+                case "Speeder":
                     return new List<string> { "Hull_HS1", "Engine_ES1", "Wings_WS1", "Thruster_TS1", "Thruster_TS1" };
                 case "Cargo":
                     return new List<string> { "Hull_HC1", "Engine_EC1", "Wings_WC1", "Thruster_TC1" };
@@ -93,8 +123,44 @@ namespace ShipFactory
                     return new List<string>();
             }
         }
+
+        public List<string> GetAssemblyInstructionsForShip(string shipType)
+        {
+            switch (shipType)
+            {
+                case "Explorer":
+                    return new List<string> 
+                    { 
+                        "ASSEMBLE TMP1 Hull_HE1 Engine_EE1",
+                        "ASSEMBLE TMP2 TMP1 Wings_WE1",
+                        "ASSEMBLE TMP3 TMP2 Thruster_TE1",
+                        "FINISHED Explorer"
+                    };
+                case "Speeder":
+                    return new List<string> 
+                    { 
+                        "ASSEMBLE TMP1 Hull_HS1 Engine_ES1",
+                        "ASSEMBLE TMP2 TMP1 Wings_WS1",
+                        "ASSEMBLE TMP3 TMP2 Thruster_TS1",
+                        "ASSEMBLE TMP4 TMP3 Thruster_TS1",
+                        "FINISHED Speeder"
+                    };
+                case "Cargo":
+                    return new List<string> 
+                    { 
+                        "ASSEMBLE TMP1 Hull_HC1 Engine_EC1",
+                        "ASSEMBLE TMP2 TMP1 Wings_WC1",
+                        "ASSEMBLE TMP3 TMP2 Thruster_TC1",
+                        "FINISHED Cargo"
+                    };
+                default:
+                    return new List<string>();
+            }
+        }
+
     }
 
+     
     class Program
     {
         static void Main(string[] args)
@@ -150,7 +216,63 @@ namespace ShipFactory
                         }
                     }
                     break;
-                // Add cases for other commands
+                case "VERIFY":
+                        if (args.Length < 2)
+                        {
+                            Console.WriteLine("ERROR: Please provide a ship.");
+                            return;
+                        }
+                       // var ship = ParseCommand(args.Skip(1).ToArray());
+                        var ship = ParseCommand(args[1].Split(','));
+                        if (ship != null)
+                        {
+                            foreach (var shipTyp in ship.Keys)
+                            {
+                                var parts = inventory.GetPartsForShip(shipTyp);
+                                if (parts.Count == 0) // Si GetPartsForShip retourne une liste vide, le type de vaisseau n'est pas reconnu
+                                {
+                                    Console.WriteLine("ERROR `" + shipTyp + "` is not a recognized spaceship");
+                                    return;
+                                }
+                            }
+                            Console.WriteLine("All spaceship types are recognized");
+                        }
+                        else
+                        {
+                            Console.WriteLine("ERROR: Invalid ship.");
+                        }
+                        break;
+                case "INSTRUCTIONS":
+                        if (args.Length < 3)
+                        {
+                            Console.WriteLine("ERROR: Please provide a quantity and a ship type.");
+                            return;
+                        }
+                        var quantity = int.Parse(args[1]);
+                        var shipType = args[2];
+                        var command_ = new Dictionary<string, int> { { shipType, quantity } };
+                        if (inventory.IsStockAvailableFor(command_))
+                        {
+                            Console.WriteLine("PRODUCING " + shipType);
+                            var parts = inventory.GetPartsForShip(shipType);
+                            foreach (var part in parts)
+                            {
+                                Console.WriteLine("GET_OUT_STOCK " + quantity + " " + part);
+                            }
+                            // Vous devez ajouter ici le code pour générer les instructions d'assemblage avec GetAssemblyInstructionsForShip
+                            var instructions = inventory.GetAssemblyInstructionsForShip(shipType);
+                            foreach (var instruction in instructions)
+                            {
+                                Console.WriteLine(instruction);
+                            }
+                            
+                        }
+                        else
+                        {
+                            Console.WriteLine("UNAVAILABLE");
+                        }
+                        break;
+
                 default:
                     Console.WriteLine("Invalid command.");
                     break;
@@ -163,7 +285,7 @@ namespace ShipFactory
 
             foreach (var arg in args)
             {
-                var parts = arg.Split(' ');
+                var parts = arg.Split(new[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
                 if (parts.Length != 2)
                 {
                     Console.WriteLine($"ERROR: Invalid command format '{arg}'.");
