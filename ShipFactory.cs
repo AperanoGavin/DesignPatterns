@@ -101,7 +101,7 @@ namespace ShipFactory
                 case "Explorer":
                     return new List<string> { "Hull_HE1", "Engine_EE1", "Wings_WE1", "Thruster_TE1" };
                 case "Speeder":
-                    return new List<string> { "Hull_HS1", "Engine_ES1", "Wings_WS1", "Thruster_TS1" };
+                    return new List<string> { "Hull_HS1", "Engine_ES1", "Wings_WS1", "Thruster_TS1" , "Thruster_TS1"};
                 case "Cargo":
                     return new List<string> { "Hull_HC1", "Engine_EC1", "Wings_WC1", "Thruster_TC1" };
                 default:
@@ -124,37 +124,39 @@ namespace ShipFactory
             }
         }
 
-        public List<string> GetAssemblyInstructionsForShip(string shipType)
+        public void ProduceShip(string shipType, int quantity)
         {
-            switch (shipType)
+            for (int i = 0; i < quantity; i++)
             {
-                case "Explorer":
-                    return new List<string> 
-                    { 
-                        "ASSEMBLE TMP1 Hull_HE1 Engine_EE1",
-                        "ASSEMBLE TMP2 TMP1 Wings_WE1",
-                        "ASSEMBLE TMP3 TMP2 Thruster_TE1",
-                        "FINISHED Explorer"
-                    };
-                case "Speeder":
-                    return new List<string> 
-                    { 
-                        "ASSEMBLE TMP1 Hull_HS1 Engine_ES1",
-                        "ASSEMBLE TMP2 TMP1 Wings_WS1",
-                        "ASSEMBLE TMP3 TMP2 Thruster_TS1",
-                        "ASSEMBLE TMP4 TMP3 Thruster_TS1",
-                        "FINISHED Speeder"
-                    };
-                case "Cargo":
-                    return new List<string> 
-                    { 
-                        "ASSEMBLE TMP1 Hull_HC1 Engine_EC1",
-                        "ASSEMBLE TMP2 TMP1 Wings_WC1",
-                        "ASSEMBLE TMP3 TMP2 Thruster_TC1",
-                        "FINISHED Cargo"
-                    };
-                default:
-                    return new List<string>();
+                Console.WriteLine($"PRODUCING {shipType}");
+                var parts = GetPartsForShip(shipType);
+                var groupedParts = parts.GroupBy(p => p).ToDictionary(g => g.Key, g => g.Count());
+
+                foreach (var part in groupedParts)
+                {
+                    Console.WriteLine($"GET_OUT_STOCK {part.Value} {part.Key}");
+                }
+
+                string tmp = "TMP1";
+                string previousTmp = "";
+                foreach (var part in groupedParts)
+                {
+                    for (int j = 0; j < part.Value; j++)
+                    {
+                        if (j == 0 && previousTmp != "")
+                        {
+                            Console.WriteLine($"ASSEMBLE {tmp} {previousTmp} {part.Key}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"ASSEMBLE {tmp} {part.Key}");
+                        }
+                        previousTmp = tmp;
+                        tmp = "TMP" + (int.Parse(tmp.Substring(3)) + 1);
+                    }
+                }
+
+                Console.WriteLine($"FINISHED {shipType}");
             }
         }
 
@@ -253,18 +255,9 @@ namespace ShipFactory
                         var command_ = new Dictionary<string, int> { { shipType, quantity } };
                         if (inventory.IsStockAvailableFor(command_))
                         {
-                            Console.WriteLine("PRODUCING " + shipType);
-                            var parts = inventory.GetPartsForShip(shipType);
-                            foreach (var part in parts)
-                            {
-                                Console.WriteLine("GET_OUT_STOCK " + quantity + " " + part);
-                            }
-                            // Vous devez ajouter ici le code pour générer les instructions d'assemblage avec GetAssemblyInstructionsForShip
-                            var instructions = inventory.GetAssemblyInstructionsForShip(shipType);
-                            foreach (var instruction in instructions)
-                            {
-                                Console.WriteLine(instruction);
-                            }
+                         
+                            // Vous devez ajouter ici le code pour générer les instructions d'assemblage avec ProduceShip
+                            inventory.ProduceShip(shipType, quantity);
                             
                         }
                         else
