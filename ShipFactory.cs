@@ -138,21 +138,18 @@ namespace ShipFactory
                 }
 
                 string tmp = "TMP1";
-                string previousTmp = "";
+                List<string> currentAssembly = new List<string>();
                 foreach (var part in groupedParts)
                 {
                     for (int j = 0; j < part.Value; j++)
                     {
-                        if (j == 0 && previousTmp != "")
+                        currentAssembly.Add(part.Key);
+                        if (j == part.Value - 1) // Si c'est la dernière pièce de ce type
                         {
-                            Console.WriteLine($"ASSEMBLE {tmp} {previousTmp} {part.Key}");
+                            Console.WriteLine($"ASSEMBLE {tmp} {string.Join(",", currentAssembly)}");
+                            currentAssembly = new List<string> { tmp }; // Le nouvel assemblage devient la base pour les prochains assemblages
+                            tmp = "TMP" + (int.Parse(tmp.Substring(3)) + 1);
                         }
-                        else
-                        {
-                            Console.WriteLine($"ASSEMBLE {tmp} {part.Key}");
-                        }
-                        previousTmp = tmp;
-                        tmp = "TMP" + (int.Parse(tmp.Substring(3)) + 1);
                     }
                 }
 
@@ -255,7 +252,6 @@ namespace ShipFactory
                         var command_ = new Dictionary<string, int> { { shipType, quantity } };
                         if (inventory.IsStockAvailableFor(command_))
                         {
-                         
                             // Vous devez ajouter ici le code pour générer les instructions d'assemblage avec ProduceShip
                             inventory.ProduceShip(shipType, quantity);
                             
