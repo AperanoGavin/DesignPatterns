@@ -1,0 +1,15 @@
+/Users/gavin.aperano-mouloungui/Gavin/Workspace/DesignPa/ShipFactory/obj/Debug/net8.0/ShipFactory.GeneratedMSBuildEditorConfig.editorconfig
+/Users/gavin.aperano-mouloungui/Gavin/Workspace/DesignPa/ShipFactory/obj/Debug/net8.0/ShipFactory.AssemblyInfoInputs.cache
+/Users/gavin.aperano-mouloungui/Gavin/Workspace/DesignPa/ShipFactory/obj/Debug/net8.0/ShipFactory.AssemblyInfo.cs
+/Users/gavin.aperano-mouloungui/Gavin/Workspace/DesignPa/ShipFactory/obj/Debug/net8.0/ShipFactory.csproj.CoreCompileInputs.cache
+/Users/gavin.aperano-mouloungui/Gavin/Workspace/DesignPa/ShipFactory/obj/Debug/net8.0/ShipFactory.sourcelink.json
+/Users/gavin.aperano-mouloungui/Gavin/Workspace/DesignPa/ShipFactory/bin/Debug/net8.0/ShipFactory
+/Users/gavin.aperano-mouloungui/Gavin/Workspace/DesignPa/ShipFactory/bin/Debug/net8.0/ShipFactory.deps.json
+/Users/gavin.aperano-mouloungui/Gavin/Workspace/DesignPa/ShipFactory/bin/Debug/net8.0/ShipFactory.runtimeconfig.json
+/Users/gavin.aperano-mouloungui/Gavin/Workspace/DesignPa/ShipFactory/bin/Debug/net8.0/ShipFactory.dll
+/Users/gavin.aperano-mouloungui/Gavin/Workspace/DesignPa/ShipFactory/bin/Debug/net8.0/ShipFactory.pdb
+/Users/gavin.aperano-mouloungui/Gavin/Workspace/DesignPa/ShipFactory/obj/Debug/net8.0/ShipFactory.dll
+/Users/gavin.aperano-mouloungui/Gavin/Workspace/DesignPa/ShipFactory/obj/Debug/net8.0/refint/ShipFactory.dll
+/Users/gavin.aperano-mouloungui/Gavin/Workspace/DesignPa/ShipFactory/obj/Debug/net8.0/ShipFactory.pdb
+/Users/gavin.aperano-mouloungui/Gavin/Workspace/DesignPa/ShipFactory/obj/Debug/net8.0/ShipFactory.genruntimeconfig.cache
+/Users/gavin.aperano-mouloungui/Gavin/Workspace/DesignPa/ShipFactory/obj/Debug/net8.0/ref/ShipFactory.dll
