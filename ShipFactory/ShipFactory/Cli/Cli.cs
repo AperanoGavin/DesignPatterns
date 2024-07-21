@@ -67,7 +67,7 @@ namespace ShipFactory.Cli
             {
                 line = Console.ReadLine();
 
-                var commandAndArgs = ParseCommand(line);
+                var commandAndArgs = ParseCommand(line ?? "");
 
                 if (commandAndArgs == null)
                 {
