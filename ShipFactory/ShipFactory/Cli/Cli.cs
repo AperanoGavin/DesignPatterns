@@ -10,7 +10,6 @@ namespace ShipFactory.Cli
 {
     public class Cli
     {
-
         private static Cli? _instance;
         private static object _lock = new object();
         private Cli()
@@ -31,22 +30,13 @@ namespace ShipFactory.Cli
                 }
             }
         }
-
-        private ICommand? GetCommand(string commandName)
-        {
-            return commandName switch
-            {
-                "STOCKS" => new Stocks(),
-                _ => null,
-            };
-        }
         
-        private (ICommand, string[])? ParseCommand(string line)
+        private ICommand? ParseCommand(string line)
         {
             
             string[] commandAndArguments = line.Trim().Split(" ");
             string commandName = commandAndArguments[0];
-            ICommand? command = GetCommand(commandName);
+            ICommand? command = CommandMap.Instance.GetCommand(commandName);
 
             if (command == null)
             {
@@ -54,29 +44,34 @@ namespace ShipFactory.Cli
                 return null;
             }
 
-            return (command, commandAndArguments.Skip(1).Take(commandAndArguments.Length).ToArray());
+            var args = commandAndArguments.Skip(1).Take(commandAndArguments.Length).ToArray();
+
+            var error = command.ParseCommandParameters(args);
+            if (error != null)
+            {
+                Console.WriteLine(error);
+                return null;
+            }
+
+            return command;
         }
 
         public void RunCli()
         {
             string? line;
-            ICommand command;
-            string[] args;
+            ICommand? command;
 
             do
             {
                 line = Console.ReadLine();
 
-                var commandAndArgs = ParseCommand(line ?? "");
+                command = ParseCommand(line ?? "");
 
-                if (commandAndArgs == null)
+                if (command == null)
                 {
                     continue;
                 }
 
-                command = commandAndArgs.Value.Item1;
-                args = commandAndArgs.Value.Item2;
-                command.ParseCommandParameters(args);
                 Console.WriteLine(command.Execute());
             } while (line != "EXIT");
         }

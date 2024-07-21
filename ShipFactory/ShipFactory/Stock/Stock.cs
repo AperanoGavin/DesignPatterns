@@ -37,7 +37,7 @@ public class Stock
             {
                 if (_instance == null)
                 {
-                    return new Stock();
+                    _instance = new Stock();
                 }
                 return _instance;
             }

@@ -1,3 +1,5 @@
+using System.Net.Mail;
+
 namespace ShipFactory.Command;
 
 public class Stocks: ICommand
@@ -7,9 +9,13 @@ public class Stocks: ICommand
         return Stock.Stock.Instance.GetAvailableStock();
     }
 
-    public bool ParseCommandParameters(string[] commandParams)
+    public string? ParseCommandParameters(string[] commandParams)
     {
-        Console.WriteLine(commandParams.Length == 0);
-        return true;
+        if (commandParams.Length != 0)
+        {
+            return "STOCKS does not take input parameters";
+        }
+
+        return null;
     }
 }
