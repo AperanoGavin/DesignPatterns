@@ -37,7 +37,7 @@ public class Produce: AbstractMultiArgsCommand, ICommand
                 intermediaryResult = cargoFactory?.Produce(quantity);
             } else
             {
-                intermediaryResult = $"ERROR Spaceship type '{spaceshipName}' does not exist";
+                intermediaryResult = $"ERROR {spaceshipName} is an unknown spaceship type";
             }
 
             result += $"{intermediaryResult}\n";
