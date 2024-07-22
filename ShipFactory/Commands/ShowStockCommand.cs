@@ -1,19 +1,17 @@
-using System;
-
 namespace ShipFactory
 {
     public class ShowStockCommand : ICommand
     {
-        private Inventory inventory;
+        private readonly Inventory _inventory;
 
         public ShowStockCommand(Inventory inventory)
         {
-            this.inventory = inventory;
+            _inventory = inventory;
         }
 
         public void Execute()
         {
-            inventory.ShowInventory();
+            _inventory.ShowInventory();
         }
     }
 }

@@ -1,26 +1,23 @@
-using System;
-
 namespace ShipFactory
 {
     public class ProduceShipCommand : ICommand
     {
-        private Inventory inventory;
-        private string shipType;
-        private int quantity;
+        private readonly Inventory _inventory;
+        private readonly string _shipType;
+        private readonly int _quantity;
 
         public ProduceShipCommand(Inventory inventory, string shipType, int quantity)
         {
-            this.inventory = inventory;
-            this.shipType = shipType;
-            this.quantity = quantity;
+            _inventory = inventory;
+            _shipType = shipType;
+            _quantity = quantity;
         }
 
         public void Execute()
         {
-            var command = new Dictionary<string, int> { { shipType, quantity } };
-            if (inventory.IsStockAvailableFor(command))
+            if (_inventory.IsStockAvailableFor(new Dictionary<string, int> { { _shipType, _quantity } }))
             {
-                inventory.ProduceShip(shipType, quantity);
+                _inventory.ProduceShip(_shipType, _quantity);
             }
             else
             {

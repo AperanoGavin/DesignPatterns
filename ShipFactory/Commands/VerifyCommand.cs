@@ -1,31 +1,28 @@
-using System;
-using System.Collections.Generic;
-
 namespace ShipFactory
 {
     public class VerifyCommand : ICommand
     {
-        private Inventory inventory;
-        private Dictionary<string, int> command;
+        private readonly Inventory _inventory;
+        private readonly Dictionary<string, int> _ships;
 
-        public VerifyCommand(Inventory inventory, Dictionary<string, int> command)
+        public VerifyCommand(Inventory inventory, Dictionary<string, int> ships)
         {
-            this.inventory = inventory;
-            this.command = command;
+            _inventory = inventory;
+            _ships = ships;
         }
 
         public void Execute()
         {
-            foreach (var shipType in command.Keys)
+            foreach (var shipType in _ships.Keys)
             {
-                var parts = inventory.GetShipParts(shipType);
+                var parts = _inventory.GetPartsForShip(shipType);
                 if (parts.Count == 0)
                 {
-                    Console.WriteLine($"ERROR `{shipType}` is not a recognized spaceship");
+                    Console.WriteLine($"ERROR: '{shipType}' is not a recognized spaceship.");
                     return;
                 }
             }
-            Console.WriteLine("All spaceship types are recognized");
+            Console.WriteLine("All spaceship types are recognized.");
         }
     }
 }

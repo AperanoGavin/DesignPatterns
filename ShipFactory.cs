@@ -1,9 +1,9 @@
-using System;
+/*using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace ShipFactory
-{
+{/
     class Ship
     {
         public string Name { get; set; }
@@ -66,52 +66,28 @@ namespace ShipFactory
                 string shipType = kvp.Key;
                 int quantity = kvp.Value;
 
-                // Check if ship type is valid
-                if (shipType != "Explorer" && shipType != "Speeder" && shipType != "Cargo")
+                var shipParts = GetShipParts(shipType);
+                if (shipParts == null)
                 {
                     Console.WriteLine($"ERROR: '{shipType}' is not a recognized spaceship.");
                     return null;
                 }
 
-                var shipParts = GetShipParts(shipType);
                 foreach (var part in shipParts)
                 {
-                    if (stock.ContainsKey(part))
-                    {
-                        if (neededStock.ContainsKey(part))
-                            neededStock[part] += quantity;
-                        else
-                            neededStock[part] = quantity;
-                    }
+                    if (neededStock.ContainsKey(part))
+                        neededStock[part] += quantity;
                     else
-                    {
-                        Console.WriteLine($"ERROR: Part '{part}' is not available in stock.");
-                        return null;
-                    }
+                        neededStock[part] = quantity;
                 }
             }
 
             return neededStock;
         }
 
-        private List<string> GetShipParts(string shipType)
+        public List<string> GetShipParts(string shipType)
         {
             switch (shipType)
-            {
-                case "Explorer":
-                    return new List<string> { "Hull_HE1", "Engine_EE1", "Wings_WE1", "Thruster_TE1" };
-                case "Speeder":
-                    return new List<string> { "Hull_HS1", "Engine_ES1", "Wings_WS1", "Thruster_TS1" , "Thruster_TS1"};
-                case "Cargo":
-                    return new List<string> { "Hull_HC1", "Engine_EC1", "Wings_WC1", "Thruster_TC1" };
-                default:
-                    return new List<string>();
-            }
-        }
-
-        public List<string> GetPartsForShip(string shipType)
-       {
-        switch (shipType)
             {
                 case "Explorer":
                     return new List<string> { "Hull_HE1", "Engine_EE1", "Wings_WE1", "Thruster_TE1" };
@@ -120,7 +96,7 @@ namespace ShipFactory
                 case "Cargo":
                     return new List<string> { "Hull_HC1", "Engine_EC1", "Wings_WC1", "Thruster_TC1" };
                 default:
-                    return new List<string>();
+                    return null;
             }
         }
 
@@ -129,7 +105,7 @@ namespace ShipFactory
             for (int i = 0; i < quantity; i++)
             {
                 Console.WriteLine($"PRODUCING {shipType}");
-                var parts = GetPartsForShip(shipType);
+                var parts = GetShipParts(shipType);
                 var groupedParts = parts.GroupBy(p => p).ToDictionary(g => g.Key, g => g.Count());
 
                 foreach (var part in groupedParts)
@@ -137,29 +113,31 @@ namespace ShipFactory
                     Console.WriteLine($"GET_OUT_STOCK {part.Value} {part.Key}");
                 }
 
-                string tmp = "TMP1";
                 List<string> currentAssembly = new List<string>();
-                foreach (var part in groupedParts)
+                string tmp = "TMP1";
+                foreach (var part in parts)
                 {
-                    for (int j = 0; j < part.Value; j++)
+                    currentAssembly.Add(part);
+                    if (currentAssembly.Count == 2)
                     {
-                        currentAssembly.Add(part.Key);
-                        if (j == part.Value - 1) // Si c'est la dernière pièce de ce type
-                        {
-                            Console.WriteLine($"ASSEMBLE {tmp} {string.Join(",", currentAssembly)}");
-                            currentAssembly = new List<string> { tmp }; // Le nouvel assemblage devient la base pour les prochains assemblages
-                            tmp = "TMP" + (int.Parse(tmp.Substring(3)) + 1);
-                        }
+                        Console.WriteLine($"ASSEMBLE {tmp} {string.Join(" ", currentAssembly)}");
+                        currentAssembly = new List<string> { tmp };
+                        tmp = "TMP" + (int.Parse(tmp.Substring(3)) + 1);
                     }
+                }
+
+                while (currentAssembly.Count > 1)
+                {
+                    Console.WriteLine($"ASSEMBLE {tmp} {string.Join(" ", currentAssembly)}");
+                    currentAssembly = new List<string> { tmp };
+                    tmp = "TMP" + (int.Parse(tmp.Substring(3)) + 1);
                 }
 
                 Console.WriteLine($"FINISHED {shipType}");
             }
         }
-
     }
 
-     
     class Program
     {
         static void Main(string[] args)
@@ -172,8 +150,7 @@ namespace ShipFactory
             inventory.AddToStock("Hull_HS1", 5);
             inventory.AddToStock("Engine_ES1", 3);
             inventory.AddToStock("Wings_WS1", 6);
-            inventory.AddToStock("Thruster_TS1", 15);
-            inventory.AddToStock("Thruster_TS1", 15);
+            inventory.AddToStock("Thruster_TS1", 30);
             inventory.AddToStock("Hull_HC1", 8);
             inventory.AddToStock("Engine_EC1", 4);
             inventory.AddToStock("Wings_WC1", 7);
@@ -216,52 +193,52 @@ namespace ShipFactory
                     }
                     break;
                 case "VERIFY":
-                        if (args.Length < 2)
+                    if (args.Length < 2)
+                    {
+                        Console.WriteLine("ERROR: Please provide a ship.");
+                        return;
+                    }
+                    var shipCommand = ParseCommand(args[1].Split(','));
+                    if (shipCommand != null)
+                    {
+                        foreach (var type in shipCommand.Keys)
                         {
-                            Console.WriteLine("ERROR: Please provide a ship.");
-                            return;
-                        }
-                       // var ship = ParseCommand(args.Skip(1).ToArray());
-                        var ship = ParseCommand(args[1].Split(','));
-                        if (ship != null)
-                        {
-                            foreach (var shipTyp in ship.Keys)
+                            var parts = inventory.GetShipParts(type);
+                            if (parts == null)
                             {
-                                var parts = inventory.GetPartsForShip(shipTyp);
-                                if (parts.Count == 0) // Si GetPartsForShip retourne une liste vide, le type de vaisseau n'est pas reconnu
-                                {
-                                    Console.WriteLine("ERROR `" + shipTyp + "` is not a recognized spaceship");
-                                    return;
-                                }
+                                Console.WriteLine("ERROR: '" + type + "' is not a recognized spaceship.");
+                                return;
                             }
-                            Console.WriteLine("All spaceship types are recognized");
                         }
-                        else
-                        {
-                            Console.WriteLine("ERROR: Invalid ship.");
-                        }
-                        break;
+                        Console.WriteLine("All spaceship types are recognized.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("ERROR: Invalid ship.");
+                    }
+                    break;
                 case "INSTRUCTIONS":
-                        if (args.Length < 3)
-                        {
-                            Console.WriteLine("ERROR: Please provide a quantity and a ship type.");
-                            return;
-                        }
-                        var quantity = int.Parse(args[1]);
-                        var shipType = args[2];
-                        var command_ = new Dictionary<string, int> { { shipType, quantity } };
-                        if (inventory.IsStockAvailableFor(command_))
-                        {
-                            // Vous devez ajouter ici le code pour générer les instructions d'assemblage avec ProduceShip
-                            inventory.ProduceShip(shipType, quantity);
-                            
-                        }
-                        else
-                        {
-                            Console.WriteLine("UNAVAILABLE");
-                        }
-                        break;
-
+                    if (args.Length < 3)
+                    {
+                        Console.WriteLine("ERROR: Please provide a quantity and a ship type.");
+                        return;
+                    }
+                    if (!int.TryParse(args[1], out int quantity))
+                    {
+                        Console.WriteLine("ERROR: Invalid quantity.");
+                        return;
+                    }
+                    var shipType = args[2];
+                    var command_ = new Dictionary<string, int> { { shipType, quantity } };
+                    if (inventory.IsStockAvailableFor(command_))
+                    {
+                        inventory.ProduceShip(shipType, quantity);
+                    }
+                    else
+                    {
+                        Console.WriteLine("UNAVAILABLE");
+                    }
+                    break;
                 default:
                     Console.WriteLine("Invalid command.");
                     break;
@@ -291,4 +268,6 @@ namespace ShipFactory
             return command;
         }
     }
+ 
 }
+*/

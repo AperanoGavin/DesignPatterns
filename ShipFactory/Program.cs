@@ -22,44 +22,53 @@ namespace ShipFactory
             inventory.AddToStock("Wings_WC1", 7);
             inventory.AddToStock("Thruster_TC1", 10);
 
+            var invoker = new CommandInvoker();
+
             if (args.Length == 0)
             {
                 Console.WriteLine("Usage: ShipFactory <command>");
                 return;
             }
 
-            CommandInvoker invoker = new CommandInvoker();
-            ICommand command = null;
-
             switch (args[0])
             {
                 case "STOCKS":
-                    command = new ShowStockCommand(inventory);
+                    invoker.SetCommand(new ShowStockCommand(inventory));
+                    invoker.ExecuteCommand();
                     break;
+
                 case "NEEDED_STOCKS":
                     if (args.Length < 2)
                     {
                         Console.WriteLine("ERROR: Please provide a list of ships.");
                         return;
                     }
-                    var neededStockCommand = ParseCommand(args.Skip(1).ToArray());
-                    if (neededStockCommand != null)
+                    var command = ParseCommand(args.Skip(1).ToArray());
+                    if (command != null)
                     {
-                        command = new NeededStocksCommand(inventory, neededStockCommand);
+                        invoker.SetCommand(new NeededStocksCommand(inventory, command));
+                        invoker.ExecuteCommand();
                     }
                     break;
+
                 case "VERIFY":
                     if (args.Length < 2)
                     {
                         Console.WriteLine("ERROR: Please provide a ship.");
                         return;
                     }
-                    var verifyCommand = ParseCommand(args[1].Split(','));
-                    if (verifyCommand != null)
+                    var ship = ParseCommand(args[1].Split(','));
+                    if (ship != null)
                     {
-                        command = new VerifyCommand(inventory, verifyCommand);
+                        invoker.SetCommand(new VerifyCommand(inventory, ship));
+                        invoker.ExecuteCommand();
+                    }
+                    else
+                    {
+                        Console.WriteLine("ERROR: Invalid ship.");
                     }
                     break;
+
                 case "INSTRUCTIONS":
                     if (args.Length < 3)
                     {
@@ -68,17 +77,13 @@ namespace ShipFactory
                     }
                     var quantity = int.Parse(args[1]);
                     var shipType = args[2];
-                    command = new ProduceShipCommand(inventory, shipType, quantity);
+                    invoker.SetCommand(new ProduceShipCommand(inventory, shipType, quantity));
+                    invoker.ExecuteCommand();
                     break;
+
                 default:
                     Console.WriteLine("Invalid command.");
-                    return;
-            }
-
-            if (command != null)
-            {
-                invoker.SetCommand(command);
-                invoker.ExecuteCommand();
+                    break;
             }
         }
 

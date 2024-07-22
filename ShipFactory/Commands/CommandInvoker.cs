@@ -4,16 +4,16 @@ namespace ShipFactory
 {
     public class CommandInvoker
     {
-        private ICommand command;
+        private ICommand _command;
 
         public void SetCommand(ICommand command)
         {
-            this.command = command;
+            _command = command;
         }
 
         public void ExecuteCommand()
         {
-            command.Execute();
+            _command?.Execute();
         }
     }
 }

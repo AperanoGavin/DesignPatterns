@@ -1,23 +1,19 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 namespace ShipFactory
 {
     public class NeededStocksCommand : ICommand
     {
-        private Inventory inventory;
-        private Dictionary<string, int> command;
+        private readonly Inventory _inventory;
+        private readonly Dictionary<string, int> _ships;
 
-        public NeededStocksCommand(Inventory inventory, Dictionary<string, int> command)
+        public NeededStocksCommand(Inventory inventory, Dictionary<string, int> ships)
         {
-            this.inventory = inventory;
-            this.command = command;
+            _inventory = inventory;
+            _ships = ships;
         }
 
         public void Execute()
         {
-            var neededStock = inventory.GetNeededStock(command);
+            var neededStock = _inventory.GetNeededStock(_ships);
             if (neededStock != null)
             {
                 Console.WriteLine("Needed Stock:");

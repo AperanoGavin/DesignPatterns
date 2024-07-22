@@ -1,0 +1,6 @@
+/obj/
+obj/
+.bsp/
+.metals/
+.scala-build/
+.vscode/

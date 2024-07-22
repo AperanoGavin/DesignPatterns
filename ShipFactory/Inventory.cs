@@ -6,16 +6,14 @@ namespace ShipFactory
 {
     public class Inventory
     {
-        private static Inventory instance;
         private Dictionary<string, int> stock;
+        private static Inventory instance;
 
-        // Constructeur privé pour empêcher l'instanciation directe
         private Inventory()
         {
             stock = new Dictionary<string, int>();
         }
 
-        // Méthode pour obtenir l'instance unique de la classe
         public static Inventory GetInstance()
         {
             if (instance == null)
@@ -66,14 +64,14 @@ namespace ShipFactory
                 string shipType = kvp.Key;
                 int quantity = kvp.Value;
 
-                // Check if ship type is valid
-                if (shipType != "Explorer" && shipType != "Speeder" && shipType != "Cargo")
+                IShipFactory factory = GetShipFactory(shipType);
+                if (factory == null)
                 {
                     Console.WriteLine($"ERROR: '{shipType}' is not a recognized spaceship.");
                     return null;
                 }
 
-                var shipParts = GetShipParts(shipType);
+                var shipParts = factory.CreateShip().Parts;
                 foreach (var part in shipParts)
                 {
                     if (stock.ContainsKey(part))
@@ -94,19 +92,25 @@ namespace ShipFactory
             return neededStock;
         }
 
-        public List<string> GetShipParts(string shipType)
+        private IShipFactory GetShipFactory(string shipType)
         {
             switch (shipType)
             {
                 case "Explorer":
-                    return new List<string> { "Hull_HE1", "Engine_EE1", "Wings_WE1", "Thruster_TE1" };
+                    return new ExplorerFactory();
                 case "Speeder":
-                    return new List<string> { "Hull_HS1", "Engine_ES1", "Wings_WS1", "Thruster_TS1", "Thruster_TS1" };
+                    return new SpeederFactory();
                 case "Cargo":
-                    return new List<string> { "Hull_HC1", "Engine_EC1", "Wings_WC1", "Thruster_TC1" };
+                    return new CargoFactory();
                 default:
-                    return new List<string>();
+                    return null;
             }
+        }
+
+        public List<string> GetPartsForShip(string shipType)
+        {
+            var factory = GetShipFactory(shipType);
+            return factory?.CreateShip().Parts ?? new List<string>();
         }
 
         public void ProduceShip(string shipType, int quantity)
@@ -114,7 +118,7 @@ namespace ShipFactory
             for (int i = 0; i < quantity; i++)
             {
                 Console.WriteLine($"PRODUCING {shipType}");
-                var parts = GetShipParts(shipType);
+                var parts = GetPartsForShip(shipType);
                 var groupedParts = parts.GroupBy(p => p).ToDictionary(g => g.Key, g => g.Count());
 
                 foreach (var part in groupedParts)
