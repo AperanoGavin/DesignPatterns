@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Data;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 
 using ShipFactory.Command;
@@ -33,9 +34,11 @@ namespace ShipFactory.Cli
         
         private ICommand? ParseCommand(string line)
         {
-            
-            string[] commandAndArguments = line.Trim().Split(" ");
-            string commandName = commandAndArguments[0];
+            var commandAndArgs = line.Trim().Split(new char[] { ' ' }, 2);
+            string commandName = commandAndArgs[0];
+
+            string args = commandAndArgs.Length > 1 ? commandAndArgs[1] : "";
+
             ICommand? command = CommandMap.Instance.GetCommand(commandName);
 
             if (command == null)
@@ -43,8 +46,6 @@ namespace ShipFactory.Cli
                 Console.WriteLine("ERROR The command" + commandName + "does not exist");
                 return null;
             }
-
-            var args = commandAndArguments.Skip(1).Take(commandAndArguments.Length).ToArray();
 
             var error = command.ParseCommandParameters(args);
             if (error != null)

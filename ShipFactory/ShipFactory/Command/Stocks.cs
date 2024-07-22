@@ -9,7 +9,7 @@ public class Stocks: ICommand
         return Stock.Stock.Instance.GetAvailableStock();
     }
 
-    public string? ParseCommandParameters(string[] commandParams)
+    public string? ParseCommandParameters(string commandParams)
     {
         if (commandParams.Length != 0)
         {
