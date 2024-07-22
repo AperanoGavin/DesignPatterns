@@ -29,6 +29,7 @@ public class CommandMap
         {
             "STOCKS" => new Stocks(),
             "VERIFY" => new Verify(),
+            "NEEDED_STOCKS" => new NeededStocks(),
             _ => null,
         };
     }
