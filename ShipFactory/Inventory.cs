@@ -74,25 +74,17 @@ namespace ShipFactory
                 var shipParts = factory.CreateShip().Parts;
                 foreach (var part in shipParts)
                 {
-                    if (stock.ContainsKey(part))
-                    {
-                        if (neededStock.ContainsKey(part))
-                            neededStock[part] += quantity;
-                        else
-                            neededStock[part] = quantity;
-                    }
+                    if (neededStock.ContainsKey(part))
+                        neededStock[part] += quantity;
                     else
-                    {
-                        Console.WriteLine($"ERROR: Part '{part}' is not available in stock.");
-                        return null;
-                    }
+                        neededStock[part] = quantity;
                 }
             }
 
             return neededStock;
         }
 
-        private IShipFactory GetShipFactory(string shipType)
+        public IShipFactory GetShipFactory(string shipType)
         {
             switch (shipType)
             {

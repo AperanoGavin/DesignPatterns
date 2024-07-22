@@ -1,28 +1,39 @@
+using System;
+using System.Collections.Generic;
+
 namespace ShipFactory
 {
     public class VerifyCommand : ICommand
     {
         private readonly Inventory _inventory;
-        private readonly Dictionary<string, int> _ships;
+        private readonly Dictionary<string, int> _shipQuantities;
 
-        public VerifyCommand(Inventory inventory, Dictionary<string, int> ships)
+        public VerifyCommand(Inventory inventory, Dictionary<string, int> shipQuantities)
         {
-            _inventory = inventory;
-            _ships = ships;
+            _inventory = inventory ?? throw new ArgumentNullException(nameof(inventory));
+            _shipQuantities = shipQuantities ?? throw new ArgumentNullException(nameof(shipQuantities));
         }
 
         public void Execute()
         {
-            foreach (var shipType in _ships.Keys)
+            foreach (var kvp in _shipQuantities)
             {
-                var parts = _inventory.GetPartsForShip(shipType);
-                if (parts.Count == 0)
+                string shipType = kvp.Key;
+                if (_inventory.GetShipFactory(shipType) == null)
                 {
                     Console.WriteLine($"ERROR: '{shipType}' is not a recognized spaceship.");
                     return;
                 }
             }
-            Console.WriteLine("All spaceship types are recognized.");
+
+            if (_inventory.IsStockAvailableFor(_shipQuantities))
+            {
+                Console.WriteLine("AVAILABLE");
+            }
+            else
+            {
+                Console.WriteLine("UNAVAILABLE");
+            }
         }
     }
 }

@@ -38,34 +38,30 @@ namespace ShipFactory
                     break;
 
                 case "NEEDED_STOCKS":
-                    if (args.Length < 2)
+                    if (args.Length < 3)
                     {
-                        Console.WriteLine("ERROR: Please provide a list of ships.");
+                        Console.WriteLine("ERROR: Please provide a list of ships and quantities.");
                         return;
                     }
-                    var command = ParseCommand(args.Skip(1).ToArray());
-                    if (command != null)
+                    var neededStocksCommand = ParseCommand(args.Skip(1).ToArray());
+                    if (neededStocksCommand != null)
                     {
-                        invoker.SetCommand(new NeededStocksCommand(inventory, command));
+                        invoker.SetCommand(new NeededStocksCommand(inventory, neededStocksCommand));
                         invoker.ExecuteCommand();
                     }
                     break;
 
-                case "VERIFY":
-                    if (args.Length < 2)
+                 case "VERIFY":
+                    if (args.Length < 3)
                     {
-                        Console.WriteLine("ERROR: Please provide a ship.");
+                        Console.WriteLine("ERROR: Please provide a list of ships and quantities.");
                         return;
                     }
-                    var ship = ParseCommand(args[1].Split(','));
-                    if (ship != null)
+                    var verifyCommand = ParseCommand(args.Skip(1).ToArray());
+                    if (verifyCommand != null)
                     {
-                        invoker.SetCommand(new VerifyCommand(inventory, ship));
+                        invoker.SetCommand(new VerifyCommand(inventory, verifyCommand));
                         invoker.ExecuteCommand();
-                    }
-                    else
-                    {
-                        Console.WriteLine("ERROR: Invalid ship.");
                     }
                     break;
 
@@ -75,7 +71,11 @@ namespace ShipFactory
                         Console.WriteLine("ERROR: Please provide a quantity and a ship type.");
                         return;
                     }
-                    var quantity = int.Parse(args[1]);
+                    if (!int.TryParse(args[1], out int quantity))
+                    {
+                        Console.WriteLine("ERROR: Quantity must be an integer.");
+                        return;
+                    }
                     var shipType = args[2];
                     invoker.SetCommand(new ProduceShipCommand(inventory, shipType, quantity));
                     invoker.ExecuteCommand();
@@ -88,6 +88,25 @@ namespace ShipFactory
         }
 
         static Dictionary<string, int> ParseCommand(string[] args)
+        {
+            var command = new Dictionary<string, int>();
+
+            for (int i = 0; i < args.Length; i += 2)
+            {
+                if (i + 1 >= args.Length || !int.TryParse(args[i], out int quantity))
+                {
+                    Console.WriteLine($"ERROR: Invalid command format '{args[i]}' or quantity '{args[i + 1]}'");
+                    return null;
+                }
+
+                string shipType = args[i + 1];
+                command[shipType] = quantity;
+            }
+
+            return command;
+        }
+
+       /*  static Dictionary<string, int> ParseCommand(string[] args)
         {
             var command = new Dictionary<string, int>();
             foreach (var arg in args)
@@ -106,6 +125,7 @@ namespace ShipFactory
                 command[parts[1]] = quantity;
             }
             return command;
-        }
+        } */
+
     }
 }
