@@ -1,0 +1,15 @@
+
+Vérifiez les stocks nécessaires pour une commande :
+dotnet run NEEDED_STOCKS 1 Explorer 2 Speeder
+
+
+Vérifiez si une commande est valide et si le stock est suffisant :
+dotnet run VERIFY 1 Explorer 2 Speeder
+
+
+Produisez une commande si le stock est suffisant :
+dotnet run INSTRUCTIONS 1 Explorer
+
+
+Produisez une commande et mettez à jour le stock :
+dotnet run PRODUCE 1 Explorer

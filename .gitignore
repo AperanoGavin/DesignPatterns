@@ -4,3 +4,5 @@ obj/
 .metals/
 .scala-build/
 .vscode/
+obj/
+bin/
