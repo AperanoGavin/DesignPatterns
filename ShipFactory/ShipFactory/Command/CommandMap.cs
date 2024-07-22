@@ -31,6 +31,7 @@ public class CommandMap
             "VERIFY" => new Verify(),
             "NEEDED_STOCKS" => new NeededStocks(),
             "INSTRUCTIONS" => new Instructions(),
+            "PRODUCE" => new Produce(),
             _ => null,
         };
     }

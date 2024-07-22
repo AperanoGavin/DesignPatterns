@@ -2,10 +2,8 @@ namespace ShipFactory.Command;
 
 using System.Text.RegularExpressions;
 
-public class AbstractMultiArgsCommand
+public abstract class AbstractMultiArgsCommand
 {
-    protected AbstractMultiArgsCommand() {}
-
     protected (uint, string)[]? _args;
 
     protected (uint, string)[]? MergeQuantites()
